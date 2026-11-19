@@ -1,26 +1,28 @@
-import pandas as pd
 import time
 from sklearn.ensemble import RandomForestRegressor
 from shared.config import *
-from shared.evaluation_harness import evaluate_model, save_result
+from shared.data_io import load_splits
+from shared.evaluation_harness import evaluate_model, save_result, save_feature_importance
 
-print("=== BẮT ĐẦU CHẠY NHÁNH RANDOM FOREST ===")
-train_df = pd.read_parquet(PATH_TRAIN)
-test_df = pd.read_parquet(PATH_TEST)
-X_train, y_train = train_df[FEATURES], train_df[TARGET]
-X_test, y_test = test_df[FEATURES], test_df[TARGET]
+def run():
+    print("\n=== RANDOM FOREST ===")
+    d = load_splits(categorical=False)
+    X_train, y_train = d['train']
+    X_valid, y_valid = d['valid']
+    X_test, y_test = d['test']
 
-# Random Forest không hiểu kiểu 'category', phải convert về int
-for col in CATEGORICAL_COLS:
-    X_train[col] = X_train[col].astype('int16')
-    X_test[col] = X_test[col].astype('int16')
+    model = RandomForestRegressor(**RF_PARAMS)
+    t0 = time.perf_counter()
+    model.fit(X_train, y_train)
+    train_time = time.perf_counter() - t0
 
-print("Đang train Random Forest (có thể mất vài phút)...")
-model = RandomForestRegressor(n_estimators=50, max_depth=15, n_jobs=-1, random_state=RANDOM_SEED)
+    params_text = (f"n_estimators={RF_PARAMS['n_estimators']}; max_depth={RF_PARAMS['max_depth']}; "
+                   f"min_samples_leaf={RF_PARAMS['min_samples_leaf']}")
+    result = evaluate_model(model, X_valid, y_valid, X_test, y_test, 'RandomForest',
+                            train_time, len(y_train), params_text)
+    save_result(result, 'randomforest')
+    save_feature_importance(model, FEATURES, 'randomforest')
+    return result
 
-t0 = time.time()
-model.fit(X_train, y_train)
-train_time = time.time() - t0
-
-result = evaluate_model(model, X_test, y_test, 'RandomForest', train_time)
-save_result(result, PATH_RESULT_RF)
+if __name__ == '__main__':
+    run()

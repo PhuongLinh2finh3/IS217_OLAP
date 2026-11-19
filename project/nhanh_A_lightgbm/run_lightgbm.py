@@ -1,26 +1,32 @@
-import pandas as pd
+import sys
 import time
-import lightgbm as lgb
 from shared.config import *
-from shared.evaluation_harness import evaluate_model, save_result
+from shared.data_io import load_splits
+from shared.evaluation_harness import evaluate_model, save_result, save_feature_importance
 
-print("=== BẮT ĐẦU CHẠY NHÁNH LIGHTGBM ===")
-train_df = pd.read_parquet(PATH_TRAIN)
-test_df = pd.read_parquet(PATH_TEST)
-X_train, y_train = train_df[FEATURES], train_df[TARGET]
-X_test, y_test = test_df[FEATURES], test_df[TARGET]
+def run(categorical, model_name, file_name):
+    import lightgbm as lgb
+    print(f"\n=== {model_name} ===")
+    d = load_splits(categorical=categorical)
+    X_train, y_train = d['train']
+    X_valid, y_valid = d['valid']
+    X_test, y_test = d['test']
 
-for col in CATEGORICAL_COLS:
-    X_train[col] = X_train[col].astype('category')
-    X_test[col] = X_test[col].astype('category')
+    model = lgb.LGBMRegressor(**LGBM_PARAMS)
+    t0 = time.perf_counter()
+    model.fit(X_train, y_train, eval_set=[(X_valid, y_valid)], eval_metric='l1',
+              callbacks=[lgb.early_stopping(EARLY_STOPPING_ROUNDS, verbose=False)])
+    train_time = time.perf_counter() - t0
 
-print("Đang train LightGBM...")
-model = lgb.LGBMRegressor(n_estimators=200, learning_rate=0.05, num_leaves=63, 
-                          n_jobs=-1, random_state=RANDOM_SEED, verbose=-1)
+    params_text = (f"num_leaves={LGBM_PARAMS['num_leaves']}; lr={LGBM_PARAMS['learning_rate']}; "
+                   f"best_iteration={model.best_iteration_}; categorical={categorical}")
+    result = evaluate_model(model, X_valid, y_valid, X_test, y_test, model_name,
+                            train_time, len(y_train), params_text)
+    save_result(result, file_name)
+    save_feature_importance(model, FEATURES, file_name)
+    return result
 
-t0 = time.time()
-model.fit(X_train, y_train)
-train_time = time.time() - t0
-
-result = evaluate_model(model, X_test, y_test, 'LightGBM', train_time)
-save_result(result, PATH_RESULT_LIGHTGBM)
+if __name__ == '__main__':
+    run(False, 'LightGBM', 'lightgbm')
+    if '--native' in sys.argv:
+        run(True, 'LightGBM (native category)', 'lightgbm_native_category')
