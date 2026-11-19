@@ -1,2 +1,2 @@
 model,MAE,MSE,RMSE,R2,MAE_valid,training_time_seconds,inference_time_seconds,n_train,n_test,params
-RandomForest,2.3978,17.9875,4.2412,0.9542,2.3878,21.52,0.71,720000,200000,n_estimators=100; max_depth=20; min_samples_leaf=5
+RandomForest,2.1679,15.9057,3.9882,0.9621,2.1651,60.27,1.85,1661331,461481,n_estimators=100; max_depth=20; min_samples_leaf=5
