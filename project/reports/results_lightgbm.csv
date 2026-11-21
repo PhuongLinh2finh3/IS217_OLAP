@@ -1,0 +1,2 @@
+model,MAE,MSE,RMSE,R2,MAE_valid,training_time_seconds,inference_time_seconds,n_train,n_test,params
+LightGBM,2.0831,18.76,4.3313,0.9553,2.0756,84.69,52.62,1661331,461481,num_leaves=63; lr=0.05; best_iteration=1490; categorical=False

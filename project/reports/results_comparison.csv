@@ -1,0 +1,4 @@
+model,MAE,MSE,RMSE,R2,MAE_valid,training_time_seconds,inference_time_seconds,n_train,n_test,params
+LightGBM,2.0831,18.76,4.3313,0.9553,2.0756,84.69,52.62,1661331,461481,num_leaves=63; lr=0.05; best_iteration=1490; categorical=False
+LightGBM (native category),2.0044,17.9705,4.2392,0.9572,1.9958,78.0,26.04,1661331,461481,num_leaves=63; lr=0.05; best_iteration=1040; categorical=True
+RandomForest,2.1679,15.9057,3.9882,0.9621,2.1651,60.27,1.85,1661331,461481,n_estimators=100; max_depth=20; min_samples_leaf=5

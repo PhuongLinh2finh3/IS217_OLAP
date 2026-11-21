@@ -1,0 +1,2 @@
+model,MAE,MSE,RMSE,R2,MAE_valid,training_time_seconds,inference_time_seconds,n_train,n_test,params
+LightGBM (native category),2.0044,17.9705,4.2392,0.9572,1.9958,78.0,26.04,1661331,461481,num_leaves=63; lr=0.05; best_iteration=1040; categorical=True

@@ -1,0 +1,2 @@
+LightGBM so voi RandomForest: MAE 3.91% thap hon, RMSE 8.60% cao hon, thoi gian huan luyen cham hon 1.41 lan.
+LightGBM (native category) so voi RandomForest: MAE 7.54% thap hon, RMSE 6.29% cao hon, thoi gian huan luyen cham hon 1.29 lan.
